@@ -5,7 +5,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/derekparker/trie"
-	"github.com/yanyiwu/gojieba"
+	"github.com/fumiama/jieba"
 	"io"
 	"os"
 	"regexp"
@@ -18,7 +18,7 @@ var (
 
 type (
 	NGram struct {
-		jb        *gojieba.Jieba
+		jb        *jieba.Segmenter
 		tr        *trie.Trie
 		n         int
 		threshold int
@@ -45,9 +45,16 @@ func New(
 		return nil, fmt.Errorf("n 值范围必须为 2 至 4")
 	}
 
-	var g NGram
+	var (
+		g   NGram
+		err error
+	)
 	g.n = n
-	g.jb = gojieba.NewJieba(baseDictPath, "", "", "", stopWordsPath)
+	if g.jb, err = jieba.LoadDictionaryAt(baseDictPath); err != nil {
+		return nil, err
+	} // , "", "", "", stopWordsPath)
+
+	_ = g.jb.LoadUserDictionaryAt(stopWordsPath)
 
 	g.tr = trie.New()
 	if stopWordsPath != "" {

@@ -4,6 +4,7 @@ go 1.24.0
 
 require (
 	github.com/derekparker/trie v0.0.0-20230829180723-39f4de51ef7d
+	github.com/fumiama/jieba v0.0.0-20221203025406-36c17a10b565
 	github.com/gin-gonic/gin v1.10.1
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/google/uuid v1.6.0
@@ -12,7 +13,6 @@ require (
 	github.com/json-iterator/go v1.1.12
 	github.com/prometheus/client_golang v1.23.2
 	github.com/segmentio/kafka-go v0.4.49
-	github.com/yanyiwu/gojieba v1.4.6
 	go.uber.org/zap v1.27.0
 	golang.org/x/exp v0.0.0-20250911091902-df9299821621
 	gopkg.in/yaml.v3 v3.0.1
