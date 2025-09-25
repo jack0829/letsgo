@@ -29,8 +29,8 @@ type (
 		Word    string   `json:"word"`      // 词
 		Freq    int      `json:"frequency"` // 词频
 		Docs    int      `json:"docs"`      // 出现的文章数
+		Token   []string `json:"-"`         // 子词元
 		blocked bool     // 是否为屏蔽词
-		token   []string // 子词元
 	}
 
 	ThresholdFunc func(totalDocs, totalFreq int, meta *Meta) bool
@@ -131,8 +131,8 @@ func (m *Meta) merge(v *Meta) {
 	if v.blocked {
 		m.blocked = true
 	}
-	if len(v.token) < len(m.token) {
-		m.token = v.token
+	if len(v.Token) < len(m.Token) {
+		m.Token = v.Token
 	}
 }
 
@@ -177,12 +177,12 @@ func (g *NGram) match(text string) map[string]*Meta {
 				tf[s] = &Meta{
 					Word:  s,
 					Freq:  1,
-					token: token,
+					Token: token,
 				}
 			} else {
 				meta.Freq++
-				if len(meta.token) < len(token) {
-					meta.token = token
+				if len(meta.Token) < len(token) {
+					meta.Token = token
 				}
 			}
 		}
@@ -220,7 +220,7 @@ func (g *NGram) Sample(title, content string) {
 	for s, meta := range mt {
 
 		// 正文有出现 && 词组
-		if _, ok := mc[s]; ok && len(meta.token) > 1 {
+		if _, ok := mc[s]; ok && len(meta.Token) > 1 {
 			if _, ok := merged[s]; !ok {
 				meta.Docs = 1
 			}
@@ -268,7 +268,7 @@ func (g *NGram) dumpTrieNode(n *trie.Node, out io.Writer, threshold ThresholdFun
 
 				if !isPrefix {
 					if threshold == nil || threshold(g.docs, g.freq, w) {
-						fmt.Fprintf(out, "%s\t%d\t%d\t%d\n", w.Word, w.Freq, w.Docs, len(w.token))
+						fmt.Fprintf(out, "%s\t%d\t%d\t%d\n", w.Word, w.Freq, w.Docs, len(w.Token))
 					}
 				}
 
@@ -329,6 +329,10 @@ func DefaultDumpThreshold(totalDocs, totalFreq int, meta *Meta) bool {
 	fr := f / d
 	// n := math.Log(D); d >= n &&
 	if idf <= 1e-1 && fr > 2 && fr < 10 && (d > 2 || f > 15) {
+		return true
+	}
+
+	if idf < 1e-3 && fr > 1 && d > 2 && len(meta.Token) < 2 {
 		return true
 	}
 
